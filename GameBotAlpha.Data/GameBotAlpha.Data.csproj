@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Models\Generator.cs~RF3a5fe786.TMP" />
+    <None Remove="Models\Item.cs~RF3aae85fd.TMP" />
+    <None Remove="Models\UserProfile.cs~RF3a5bf5b3.TMP" />
+    <None Remove="Repositories\BaseRepository.cs~RF3a543497.TMP" />
+    <None Remove="Repositories\IUserProfileRepository.cs~RF3a94dc98.TMP" />
+    <None Remove="Repositories\IUserProfileRepository.cs~RF3a980918.TMP" />
+    <None Remove="Repositories\IUserProfileRepository.cs~RF3afa53a1.TMP" />
+    <None Remove="Repositories\IUserProfileRepository.cs~RF3b5ec7b2.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.0" />
+  </ItemGroup>
+
+</Project>
