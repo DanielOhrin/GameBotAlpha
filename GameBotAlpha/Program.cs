@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands.EventArgs;
 using GameBotAlpha.Attributes;
+using GameBotAlpha.Services;
 
 namespace GameBotAlpha
 {
@@ -35,7 +36,7 @@ namespace GameBotAlpha
             SlashCommandsExtension slashCommands = discord.UseSlashCommands(new SlashCommandsConfiguration
             {
                 Services = new ServiceCollection()
-                    .AddSingleton<Random>()
+                    .AddSingleton<Game>()
                     .BuildServiceProvider()
             });
             slashCommands.RegisterCommands(Assembly.GetExecutingAssembly()); //! Register all slash commands from all classes in the assembly
@@ -53,7 +54,7 @@ namespace GameBotAlpha
             {
                 if (failedCheck is PlayerStartedGame)
                 {
-                    await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Type /start to begin playing!"));
+                    await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Type /start to begin playing. If already started, you can make a new account with /reset"));
                 }
             }
         }

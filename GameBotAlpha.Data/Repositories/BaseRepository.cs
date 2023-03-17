@@ -10,6 +10,6 @@ namespace GameBotAlpha.Data.Repositories
             _connectionString = connectionString;
         }
 
-        protected SqlConnection Connection => new(_connectionString);
+        protected SqlConnection Connection => new SqlConnection(_connectionString);
     }
 }

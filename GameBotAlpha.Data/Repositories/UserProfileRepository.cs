@@ -176,7 +176,6 @@ namespace GameBotAlpha.Data.Repositories
 
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = @"
                         SELECT Id
                         FROM dbo.UserProfile
@@ -186,7 +185,7 @@ namespace GameBotAlpha.Data.Repositories
 
                     cmd.Parameters.AddWithValue("@DiscordUid", discordUid);
 
-                    return cmd.ExecuteScalar() == null;
+                    return cmd.ExecuteScalar() != null;
                 }
             }
         }
