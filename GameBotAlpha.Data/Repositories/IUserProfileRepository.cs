@@ -5,6 +5,7 @@ namespace GameBotAlpha.Data.Repositories
 {
     public interface IUserProfileRepository
     {
+        public bool HasStarted(string discordUid);
         public void Start(string discordUid);
         public void Reset(string discordUid);
         public UserProfile GetById(string discordUid);

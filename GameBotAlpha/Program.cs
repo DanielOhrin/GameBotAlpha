@@ -8,6 +8,10 @@ using System.Reflection;
 
 using Microsoft.Extensions.Configuration;
 
+using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands.EventArgs;
+using GameBotAlpha.Attributes;
+
 namespace GameBotAlpha
 {
     internal class Program
@@ -35,9 +39,23 @@ namespace GameBotAlpha
                     .BuildServiceProvider()
             });
             slashCommands.RegisterCommands(Assembly.GetExecutingAssembly()); //! Register all slash commands from all classes in the assembly
+            slashCommands.SlashCommandErrored += SlashCmdErroredHandler;
+
 
             await discord.ConnectAsync();
             await Task.Delay(-1); //! Prevents the task -- connection -- from ever ending
+        }
+
+        private static async Task SlashCmdErroredHandler(SlashCommandsExtension _, SlashCommandErrorEventArgs e)
+        {
+            var failedChecks = ((SlashExecutionChecksFailedException)e.Exception).FailedChecks;
+            foreach (var failedCheck in failedChecks)
+            {
+                if (failedCheck is PlayerStartedGame)
+                {
+                    await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Type /start to begin playing!"));
+                }
+            }
         }
     }
 }

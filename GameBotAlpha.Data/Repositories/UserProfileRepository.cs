@@ -166,9 +166,29 @@ namespace GameBotAlpha.Data.Repositories
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
 
+        public bool HasStarted(string discordUid)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
 
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = @"
+                        SELECT Id
+                        FROM dbo.UserProfile
+                        WHERE DiscordUid = @DiscordUid
+                            AND DateDeleted IS NULL
+                    ";
 
+                    cmd.Parameters.AddWithValue("@DiscordUid", discordUid);
+
+                    return cmd.ExecuteScalar() == null;
+                }
+            }
         }
     }
 }

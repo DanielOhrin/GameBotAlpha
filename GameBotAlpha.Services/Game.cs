@@ -3,26 +3,17 @@ using GameBotAlpha.Data.Repositories;
 
 namespace GameBotAlpha.Services
 {
-    /* TODO: (Not necessarily in this order)
- * Create seed data for backpacks, generators, and items <---- DONE! 
- * Implement methods in repository and Game to upgrade backpack/generators 
- * Create the commands for all of these things
- * Create an attribute to check if the player has an active profile (IMPORTANT)
- * Test the game thoroughly before moving on to extra goals.
- * 
- * Extra Goals:
- * Implement buyable multipliers
- * Implement prestige system, where the player gets + 0.1x sell boost or something each prestige.
- * 
- * 
- * 
- */
     public class Game : ConnectionStringContainer, IGame
     {
         private readonly IUserProfileRepository _userProfileRepository;
         public Game()
         {
             _userProfileRepository = new UserProfileRepository(_connectionString);
+        }
+
+        public bool HasStarted(string discordUid)
+        {
+            return _userProfileRepository.HasStarted(discordUid);
         }
 
         public void Reset(string discordUid)
