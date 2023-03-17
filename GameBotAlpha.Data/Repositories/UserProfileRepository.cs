@@ -166,9 +166,49 @@ namespace GameBotAlpha.Data.Repositories
                     cmd.ExecuteNonQuery();
                 }
             }
+        }
+        
+        public int PriceOfUpgrade(string discordUid, UpgradeTypes upgradeType)
+        {
+            string itemToUpgrade = Enum.GetName(typeof(UpgradeTypes), upgradeType) ?? "INVALID ITEM";
 
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
 
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandText = "dbo.PriceOfUpgrade";
 
+                    cmd.Parameters.AddWithValue("@DiscordUid", discordUid);
+                    cmd.Parameters.AddWithValue("@UpgradeType", itemToUpgrade);
+
+                    return (int)cmd.ExecuteScalar();
+                }
+            }
+        }
+
+        public bool HasStarted(string discordUid)
+        {
+            using (SqlConnection conn = Connection)
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = @"
+                        SELECT Id
+                        FROM dbo.UserProfile
+                        WHERE DiscordUid = @DiscordUid
+                            AND DateDeleted IS NULL
+                    ";
+
+                    cmd.Parameters.AddWithValue("@DiscordUid", discordUid);
+
+                    return cmd.ExecuteScalar() != null;
+                }
+            }
         }
     }
 }

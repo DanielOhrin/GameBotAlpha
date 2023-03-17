@@ -1,28 +1,77 @@
-﻿using GameBotAlpha.Data.Models;
+﻿using GameBotAlpha.Data.Enums;
+using GameBotAlpha.Data.Models;
 using GameBotAlpha.Data.Repositories;
 
 namespace GameBotAlpha.Services
 {
-    /* TODO: (Not necessarily in this order)
- * Create seed data for backpacks, generators, and items <---- DONE! 
- * Implement methods in repository and Game to upgrade backpack/generators 
- * Create the commands for all of these things
- * Create an attribute to check if the player has an active profile (IMPORTANT)
- * Test the game thoroughly before moving on to extra goals.
- * 
- * Extra Goals:
- * Implement buyable multipliers
- * Implement prestige system, where the player gets + 0.1x sell boost or something each prestige.
- * 
- * 
- * 
- */
     public class Game : ConnectionStringContainer, IGame
     {
         private readonly IUserProfileRepository _userProfileRepository;
         public Game()
         {
             _userProfileRepository = new UserProfileRepository(_connectionString);
+        }
+
+        public void Start(string discordUid)
+        {
+            _userProfileRepository.Start(discordUid);
+        }
+
+        public bool HasStarted(string discordUid)
+        {
+            return _userProfileRepository.HasStarted(discordUid);
+        }
+
+        public KeyValuePair<bool, int> Upgrade(string discordUid, UpgradeTypes upgradeType)
+        {
+            /*! KeyValuePair:
+             * bool: whether or not the upgrade happened
+             * int: the price of the upgrade (if 0, then they are at the max upgrade for that item)
+             */
+            UserProfile profile = _userProfileRepository.GetById(discordUid);
+
+            bool didSucceed = false;
+            int priceOfUpgrade = _userProfileRepository.PriceOfUpgrade(discordUid, upgradeType);
+            
+
+            if (priceOfUpgrade > 0)
+            {
+                if (profile.Balance >= priceOfUpgrade)
+                {
+                    _userProfileRepository.Upgrade(discordUid, upgradeType);
+                    didSucceed = true;
+                }
+            }
+
+            return new KeyValuePair<bool, int>(didSucceed, priceOfUpgrade);
+        }
+
+        public KeyValuePair<int, Backpack> Backpack(string discordUid)
+        {
+            UserProfile profile = _userProfileRepository.GetById(discordUid);
+
+            int generations = (profile.LastSell - DateTime.Now).Seconds / profile.Generator.SecondsPerGeneration;
+
+            //! Store the amount of items sold.
+            int itemAmount = 0;
+
+            try
+            {
+                checked
+                {
+                    itemAmount = generations * profile.Generator.Amount;
+                }
+            }
+            catch (OverflowException)
+            {
+                itemAmount = profile.Backpack.ItemLimit;
+            }
+            finally
+            {
+                itemAmount = itemAmount > profile.Backpack.ItemLimit ? profile.Backpack.ItemLimit : itemAmount;
+            }
+
+            return new KeyValuePair<int, Backpack>(itemAmount, profile.Backpack);
         }
 
         public void Reset(string discordUid)
@@ -81,11 +130,6 @@ namespace GameBotAlpha.Services
         public UserProfile GetProfile(string discordUid)
         {
             return _userProfileRepository.GetById(discordUid);
-        }
-
-        public Backpack Backpack(string discordUid)
-        {
-            return _userProfileRepository.GetById(discordUid).Backpack;
         }
     }
 }

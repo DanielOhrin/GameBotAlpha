@@ -8,6 +8,11 @@ using System.Reflection;
 
 using Microsoft.Extensions.Configuration;
 
+using DSharpPlus.Entities;
+using DSharpPlus.SlashCommands.EventArgs;
+using GameBotAlpha.Attributes;
+using GameBotAlpha.Services;
+
 namespace GameBotAlpha
 {
     internal class Program
@@ -31,13 +36,27 @@ namespace GameBotAlpha
             SlashCommandsExtension slashCommands = discord.UseSlashCommands(new SlashCommandsConfiguration
             {
                 Services = new ServiceCollection()
-                    .AddSingleton<Random>()
+                    .AddSingleton<Game>()
                     .BuildServiceProvider()
             });
             slashCommands.RegisterCommands(Assembly.GetExecutingAssembly()); //! Register all slash commands from all classes in the assembly
+            slashCommands.SlashCommandErrored += SlashCmdErroredHandler;
+
 
             await discord.ConnectAsync();
             await Task.Delay(-1); //! Prevents the task -- connection -- from ever ending
+        }
+
+        private static async Task SlashCmdErroredHandler(SlashCommandsExtension _, SlashCommandErrorEventArgs e)
+        {
+            var failedChecks = ((SlashExecutionChecksFailedException)e.Exception).FailedChecks;
+            foreach (var failedCheck in failedChecks)
+            {
+                if (failedCheck is PlayerStartedGame)
+                {
+                    await e.Context.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, new DiscordInteractionResponseBuilder().WithContent("Type /start to begin playing. If already started, you can make a new account with /reset"));
+                }
+            }
         }
     }
 }

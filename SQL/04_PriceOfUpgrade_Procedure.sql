@@ -17,32 +17,24 @@ DECLARE @UpgradePrice INT
 IF @UpgradeType = 'Generator'
 BEGIN
 	SET @UpgradePrice = (
-		SELECT g.BuyPrice
+		SELECT COALESCE(g.BuyPrice, 0)
 		FROM dbo.UserProfile up
 		LEFT JOIN dbo.Generator g ON g.Id = up.GeneratorId + 1
 		WHERE up.DiscordUid = @DiscordUid
 			AND up.DateDeleted IS NULL
 	)
 
-	UPDATE dbo.UserProfile
-	SET Balance -= @UpgradePrice,
-		GeneratorId += 1
-	WHERE DiscordUid = @DiscordUid
-		AND DateDeleted IS NULL
+	SELECT @UpgradePrice;
 END
 ELSE IF @UpgradeType = 'Backpack'
 BEGIN
 	SET @UpgradePrice = (
-		SELECT bp.BuyPrice
+		SELECT COALESCE(bp.BuyPrice, 0)
 		FROM dbo.UserProfile up
 		LEFT JOIN dbo.Backpack bp ON bp.Id = up.BackpackId + 1
 		WHERE up.DiscordUid = @DiscordUid
 			AND up.DateDeleted IS NULL
 	)
 
-		UPDATE dbo.UserProfile
-	SET Balance -= @UpgradePrice,
-		BackpackId += 1
-	WHERE DiscordUid = @DiscordUid
-		AND DateDeleted IS NULL
+	SELECT @UpgradePrice;
 END
