@@ -37,7 +37,7 @@ CREATE TABLE Backpack (
 CREATE TABLE UserProfile (
 	Id int PRIMARY KEY IDENTITY(1, 1),
 	DiscordUid nvarchar(max),
-	DateCreated datetime DEFAULT(CAST(GETDATE() AS DATE)),
+	DateCreated datetime DEFAULT(GETDATE()),
 	Balance int DEFAULT(0),
 	GeneratorId int DEFAULT(1),
 	BackpackId int DEFAULT(1),
