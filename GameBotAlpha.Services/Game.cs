@@ -1,4 +1,5 @@
-﻿using GameBotAlpha.Data.Models;
+﻿using GameBotAlpha.Data.Enums;
+using GameBotAlpha.Data.Models;
 using GameBotAlpha.Data.Repositories;
 
 namespace GameBotAlpha.Services
@@ -11,9 +12,66 @@ namespace GameBotAlpha.Services
             _userProfileRepository = new UserProfileRepository(_connectionString);
         }
 
+        public void Start(string discordUid)
+        {
+            _userProfileRepository.Start(discordUid);
+        }
+
         public bool HasStarted(string discordUid)
         {
             return _userProfileRepository.HasStarted(discordUid);
+        }
+
+        public KeyValuePair<bool, int> Upgrade(string discordUid, UpgradeTypes upgradeType)
+        {
+            /*! KeyValuePair:
+             * bool: whether or not the upgrade happened
+             * int: the price of the upgrade (if 0, then they are at the max upgrade for that item)
+             */
+            UserProfile profile = _userProfileRepository.GetById(discordUid);
+
+            bool didSucceed = false;
+            int priceOfUpgrade = _userProfileRepository.PriceOfUpgrade(discordUid, upgradeType);
+            
+
+            if (priceOfUpgrade > 0)
+            {
+                if (profile.Balance >= priceOfUpgrade)
+                {
+                    _userProfileRepository.Upgrade(discordUid, upgradeType);
+                    didSucceed = true;
+                }
+            }
+
+            return new KeyValuePair<bool, int>(didSucceed, priceOfUpgrade);
+        }
+
+        public KeyValuePair<int, Backpack> Backpack(string discordUid)
+        {
+            UserProfile profile = _userProfileRepository.GetById(discordUid);
+
+            int generations = (profile.LastSell - DateTime.Now).Seconds / profile.Generator.SecondsPerGeneration;
+
+            //! Store the amount of items sold.
+            int itemAmount = 0;
+
+            try
+            {
+                checked
+                {
+                    itemAmount = generations * profile.Generator.Amount;
+                }
+            }
+            catch (OverflowException)
+            {
+                itemAmount = profile.Backpack.ItemLimit;
+            }
+            finally
+            {
+                itemAmount = itemAmount > profile.Backpack.ItemLimit ? profile.Backpack.ItemLimit : itemAmount;
+            }
+
+            return new KeyValuePair<int, Backpack>(itemAmount, profile.Backpack);
         }
 
         public void Reset(string discordUid)
@@ -72,11 +130,6 @@ namespace GameBotAlpha.Services
         public UserProfile GetProfile(string discordUid)
         {
             return _userProfileRepository.GetById(discordUid);
-        }
-
-        public Backpack Backpack(string discordUid)
-        {
-            return _userProfileRepository.GetById(discordUid).Backpack;
         }
     }
 }
