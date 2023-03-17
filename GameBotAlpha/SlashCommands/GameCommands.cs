@@ -4,6 +4,8 @@ using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.SlashCommands;
 
+using Emzi0767.Utilities;
+
 using GameBotAlpha.Attributes;
 using GameBotAlpha.AutocompleteProviders;
 using GameBotAlpha.Data.Enums;
@@ -37,28 +39,49 @@ namespace GameBotAlpha.SlashCommands
         }
 
         [SlashCommand("upgrade", "Upgrade your items!"), PlayerStartedGame(true)]
-        public async Task UpgradeCommand(InteractionContext ctx, [Option("item", "The thing you want to upgrade", true)][Autocomplete(typeof(UpgradeAutoCompleteProvider))] UpgradeTypes upgradeType)
+        public async Task UpgradeCommand(InteractionContext ctx, [Option("item", "The thing you want to upgrade", true)][Autocomplete(typeof(UpgradeAutoCompleteProvider))] string upgradeType)
         {
             await ctx.CreateResponseAsync(InteractionResponseType.DeferredChannelMessageWithSource);
             
             string response;
-            KeyValuePair<bool, int> result = _game.Upgrade(ctx.Member.Id.ToString(), upgradeType);
+            try
+            {
+                string[] keys = Enum.GetNames(typeof(UpgradeTypes));
+                UpgradeTypes[] values = Enum.GetValues<UpgradeTypes>();
 
-            if (result.Value == 0)
-            {
-                response = $"You cannot upgrade your {Enum.GetName(typeof(UpgradeTypes), upgradeType)} any further.";
-            }
-            else
-            {
-                if (result.Key == false)
+                Dictionary<string, UpgradeTypes> keyValuePairs = new();
+                for (int i = 0; i < keys.Length; i++)
                 {
-                    response = $"Insufficient funds. Next {Enum.GetName(typeof(UpgradeTypes), upgradeType)} upgrade costs {result.Value}";
+                    keyValuePairs.Add(keys[i].ToLower(), values[i]);
+                }
+                
+                UpgradeTypes castedUpgradeType = keyValuePairs[upgradeType];
+
+                KeyValuePair<bool, int> result = _game.Upgrade(ctx.Member.Id.ToString(), castedUpgradeType);
+
+                if (result.Value == 0)
+                {
+                    response = $"You cannot upgrade your {Enum.GetName(typeof(UpgradeTypes), castedUpgradeType)} any further.";
                 }
                 else
                 {
-                    response = $"Success! You upgraded your {Enum.GetName(typeof(UpgradeTypes), upgradeType)} for {result.Value}";
+                    if (result.Key == false)
+                    {
+                        response = $"Insufficient funds. Next {Enum.GetName(typeof(UpgradeTypes), castedUpgradeType)} upgrade costs {result.Value}";
+                    }
+                    else
+                    {
+                        response = $"Success! You upgraded your {Enum.GetName(typeof(UpgradeTypes), castedUpgradeType)} for {result.Value}";
+                    }
                 }
             }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.StackTrace);
+                response = "Invalid item name.";
+            }
+
 
             await ctx.EditResponseAsync(new DiscordWebhookBuilder().WithContent(response));
         }

@@ -64,15 +64,16 @@ namespace GameBotAlpha.Data.Repositories
                 using (SqlCommand cmd = conn.CreateCommand())
                 {
                     cmd.CommandText = @"
-                        SELECT up.Id UserProfileId, up.DiscordUid, up.DateCreated, up.Balance, up.GeneratorId, up.LastSell, up.BackpackId
+                        SELECT up.Id UserProfileId, up.DiscordUid, up.DateCreated, up.Balance, up.GeneratorId, up.LastSell, up.BackpackId,
                                 g.[Name] GeneratorName, g.ItemId, g.Amount, g.SPG,
                                 i.[Name] ItemName, i.SellPrice,
                                 bp.[Name] BackpackName, bp.BuyPrice BackpackBuyPrice, bp.ItemLimit
                         FROM dbo.UserProfile up
                         LEFT JOIN Generator g ON g.Id = up.GeneratorId 
                         LEFT JOIN Item i ON i.Id = g.ItemId
+						LEFT JOIN Backpack bp ON bp.Id = up.BackpackId
                         WHERE up.DiscordUid = @DiscordUid 
-                            AND DateDeleted IS NULL
+                            AND up.DateDeleted IS NULL
                     ";
 
                     cmd.Parameters.AddWithValue("@DiscordUid", discordUid);
@@ -122,7 +123,7 @@ namespace GameBotAlpha.Data.Repositories
             }
         }
 
-        public void SetBalance(string discordUid, int balance)
+        public void SetBalance(string discordUid, int balance, bool isSell)
         {
             using (SqlConnection conn = Connection)
             {
@@ -132,7 +133,14 @@ namespace GameBotAlpha.Data.Repositories
                 {
                     cmd.CommandText = @"
                         UPDATE dbo.UserProfile
-                        SET Balance = @Balance
+                        SET Balance = @Balance";
+
+                    if (isSell)
+                    {
+                        cmd.CommandText += ", LastSell = GetDate()";
+                    }
+
+                    cmd.CommandText += @"
                         WHERE DiscordUid = @DiscordUid
                             AND DateDeleted IS NULL                    
                     ";
@@ -141,8 +149,6 @@ namespace GameBotAlpha.Data.Repositories
                     cmd.Parameters.AddWithValue("@Balance", balance);
 
                     cmd.ExecuteNonQuery();
-
-                    Start(discordUid);
                 }
             }
         }

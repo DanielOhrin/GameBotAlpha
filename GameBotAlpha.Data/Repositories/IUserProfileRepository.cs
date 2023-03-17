@@ -9,7 +9,7 @@ namespace GameBotAlpha.Data.Repositories
         public void Start(string discordUid);
         public void Reset(string discordUid);
         public UserProfile GetById(string discordUid);
-        public void SetBalance(string discordUid, int balance);
+        public void SetBalance(string discordUid, int balance, bool isSell);
         public void Upgrade(string discordUid, UpgradeTypes upgradeType);
         public int PriceOfUpgrade(string discordUid, UpgradeTypes upgradeType);
     }

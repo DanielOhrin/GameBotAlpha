@@ -23,8 +23,6 @@ BEGIN
 		WHERE up.DiscordUid = @DiscordUid
 			AND up.DateDeleted IS NULL
 	)
-
-	SELECT @UpgradePrice;
 END
 ELSE IF @UpgradeType = 'Backpack'
 BEGIN
@@ -35,6 +33,6 @@ BEGIN
 		WHERE up.DiscordUid = @DiscordUid
 			AND up.DateDeleted IS NULL
 	)
-
-	SELECT @UpgradePrice;
 END
+
+SELECT @UpgradePrice;

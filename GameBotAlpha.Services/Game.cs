@@ -50,7 +50,7 @@ namespace GameBotAlpha.Services
         {
             UserProfile profile = _userProfileRepository.GetById(discordUid);
 
-            int generations = (profile.LastSell - DateTime.Now).Seconds / profile.Generator.SecondsPerGeneration;
+            int generations = (DateTime.Now - profile.LastSell).Seconds / profile.Generator.SecondsPerGeneration;
 
             //! Store the amount of items sold.
             int itemAmount = 0;
@@ -92,7 +92,7 @@ namespace GameBotAlpha.Services
             };
 
             //! Store the total amount of generations since the last sell.
-            int generations = (profile.LastSell - DateTime.Now).Seconds / profile.Generator.SecondsPerGeneration;
+            int generations = (DateTime.Now - profile.LastSell).Seconds / profile.Generator.SecondsPerGeneration;
 
             //! Store the amount of items sold.
             int itemAmount = 0;
@@ -122,7 +122,7 @@ namespace GameBotAlpha.Services
             int newBalance = profile.Balance + profit;
             result["NewBalance"] = newBalance;
 
-            _userProfileRepository.SetBalance(discordUid, newBalance);
+            _userProfileRepository.SetBalance(discordUid, newBalance, true);
 
             return result;
         }

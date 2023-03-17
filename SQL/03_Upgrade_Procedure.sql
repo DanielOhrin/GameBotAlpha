@@ -1,10 +1,10 @@
 use [GamePoc]
 GO
 
-DROP PROCEDURE IF EXISTS dbo.PriceOfUpgrade
+DROP PROCEDURE IF EXISTS dbo.Upgrade
 GO
 
-CREATE PROCEDURE dbo.PriceOfUpgrade @DiscordUid nvarchar(max), @UpgradeType nvarchar(50)
+CREATE PROCEDURE dbo.Upgrade @DiscordUid nvarchar(max), @UpgradeType nvarchar(50)
 AS
 
 -- We are checking this in the app, but still adding this error just in case.
@@ -12,7 +12,7 @@ IF @UpgradeType NOT IN ('Generator', 'Backpack')
 	THROW 50000, 'Invalid upgrade type.', 16
 
 -- In the app, we check that the user CAN upgrade their generator/backack AND that they have sufficient funds.
-DECLARE @UpgradePrice INT
+DECLARE @UpgradePrice INT;
 
 IF @UpgradeType = 'Generator'
 BEGIN
